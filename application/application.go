@@ -31,6 +31,6 @@ type Application struct {
 }
 
 func NewApplication(storage Storage)*Application{
-          app:=Application{storage:storage}
-		  return &app
+          app:=&Application{storage:storage}
+		  return app
 }

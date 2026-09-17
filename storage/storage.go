@@ -1,0 +1,47 @@
+package storage
+
+import (
+	"fmt"
+
+	"github.com/Mayankkaira/notes-api/application"
+	"github.com/Mayankkaira/notes-api/note"
+)
+
+type InMemoryStorage struct {
+	notes  map[int]note.Note
+	nextID int
+}
+
+func NewInMemoryStorage() *InMemoryStorage {
+	notes := make(map[int]note.Note)
+	return &InMemoryStorage{notes: notes, nextID: 1}
+}
+
+func (s *InMemoryStorage) Create(input application.CreateNoteInput) (int, error) {
+	unote := note.Note{
+		Title:     input.Title,
+		Content:   input.Content,
+		CreatedAt: input.CreatedAt,
+		UpdatedAt: input.UpdatedAt,
+	}
+	unote.ID = s.nextID
+	s.notes[unote.ID] = unote
+	s.nextID++
+	return unote.ID, nil
+}
+
+func (s *InMemoryStorage) Get(id int) (note.Note, error) {
+	val, ok := s.notes[id]
+	if !ok {
+		return val, fmt.Errorf("note with %d doesn't exist", id)
+	}
+	return val, nil
+}
+
+func (s *InMemoryStorage) List() ([]note.Note,error) {
+	var noteSlice []note.Note
+	for _, value := range s.notes {
+		noteSlice = append(noteSlice, value)
+	}
+	return noteSlice,nil
+}

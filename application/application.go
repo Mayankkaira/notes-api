@@ -53,6 +53,40 @@ func (a *Application) CreateNote(title, content string) (int, error) {
 }
 
 func (a *Application) GetNote(id int) (note.Note, error) {
-	storedNote, err := a.storage.Get(id)
-	return storedNote, err
+	storedNode, err := a.storage.Get(id)
+	return storedNode, err
+}
+
+func (a *Application) ListNotes() ([]note.Note, error) {
+	cNotes, err := a.storage.List()
+	return cNotes, err
+}
+
+func (a *Application) UpdateNote(id int, title, content *string) error {
+	if title == nil && content == nil {
+		return fmt.Errorf("both fields can't be empty")
+	}
+	if title != nil {
+		if len(*title) == 0 {
+			return fmt.Errorf("Invalid title")
+		}
+	}
+	if content != nil {
+		if len(*content) == 0 {
+			return fmt.Errorf("Invalid content")
+		}
+	}
+	updateNote := UpdateNoteInput{
+		Title:     title,
+		Content:   content,
+		UpdatedAt: time.Now(),
+	}
+	err := a.storage.Update(id, updateNote)
+	return err
+
+}
+
+func (a *Application) DeleteNote(id int) error {
+	err := a.storage.Delete(id)
+	return err
 }

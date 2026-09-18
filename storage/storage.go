@@ -70,3 +70,4 @@ func (s *InMemoryStorage) Delete(id int) error {
 	delete(s.notes, id)
 	return nil
 }
+

@@ -51,13 +51,22 @@ func (s *InMemoryStorage) Update(id int, update application.UpdateNoteInput) err
 	if !ok {
 		return fmt.Errorf("Note with %d doesn't exist", id)
 	}
-	if update.Title!=nil{
+	if update.Title != nil {
 		val.Title = *update.Title
 	}
-	if update.Content!=nil{
+	if update.Content != nil {
 		val.Content = *update.Content
 	}
 	val.UpdatedAt = update.UpdatedAt
-	s.notes[id]=val
+	s.notes[id] = val
+	return nil
+}
+
+func (s *InMemoryStorage) Delete(id int) error {
+	_, ok := s.notes[id]
+	if !ok {
+		return fmt.Errorf("Note doesn't exist corresponding to %d ", id)
+	}
+	delete(s.notes, id)
 	return nil
 }

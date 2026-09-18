@@ -38,10 +38,26 @@ func (s *InMemoryStorage) Get(id int) (note.Note, error) {
 	return val, nil
 }
 
-func (s *InMemoryStorage) List() ([]note.Note,error) {
+func (s *InMemoryStorage) List() ([]note.Note, error) {
 	var noteSlice []note.Note
 	for _, value := range s.notes {
 		noteSlice = append(noteSlice, value)
 	}
-	return noteSlice,nil
+	return noteSlice, nil
+}
+
+func (s *InMemoryStorage) Update(id int, update application.UpdateNoteInput) error {
+	val, ok := s.notes[id]
+	if !ok {
+		return fmt.Errorf("Note with %d doesn't exist", id)
+	}
+	if update.Title!=nil{
+		val.Title = *update.Title
+	}
+	if update.Content!=nil{
+		val.Content = *update.Content
+	}
+	val.UpdatedAt = update.UpdatedAt
+	s.notes[id]=val
+	return nil
 }

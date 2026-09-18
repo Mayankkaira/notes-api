@@ -14,8 +14,9 @@ type CreateNoteInput struct {
 }
 
 type UpdateNoteInput struct {
-	Title   *string
-	Content *string
+	Title     *string
+	Content   *string
+	UpdatedAt time.Time
 }
 
 type Storage interface {
@@ -30,7 +31,7 @@ type Application struct {
 	storage Storage
 }
 
-func NewApplication(storage Storage)*Application{
-          app:=&Application{storage:storage}
-		  return app
+func NewApplication(storage Storage) *Application {
+	app := &Application{storage: storage}
+	return app
 }

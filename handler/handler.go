@@ -10,3 +10,8 @@ func NewHandler(application *application.Application) *Handler {
 	handler := &Handler{application: application}
 	return handler
 }
+
+type CreateNoteRequest struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
+}

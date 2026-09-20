@@ -21,7 +21,7 @@ type UpdateNoteInput struct {
 }
 
 type Storage interface {
-	Create(input CreateNoteInput) (int, error)
+	Create(input CreateNoteInput) (note.Note, error)
 	Get(ID int) (note.Note, error)
 	List() ([]note.Note, error)
 	Update(ID int, updateInput UpdateNoteInput) error
@@ -37,9 +37,10 @@ func NewApplication(storage Storage) *Application {
 	return app
 }
 
-func (a *Application) CreateNote(title, content string) (int, error) {
+func (a *Application) CreateNote(title, content string) (note.Note, error) {
+	var createdNote note.Note
 	if len(title) == 0 || len(content) == 0 {
-		return 0, fmt.Errorf("empty value error")
+		return createdNote, fmt.Errorf("empty value error")
 	}
 	currentTime := time.Now()
 	noteInput := CreateNoteInput{
@@ -48,13 +49,13 @@ func (a *Application) CreateNote(title, content string) (int, error) {
 		CreatedAt: currentTime,
 		UpdatedAt: currentTime,
 	}
-	id, err := a.storage.Create(noteInput)
-	return id, err
+	createdNote, err := a.storage.Create(noteInput)
+	return createdNote, err
 }
 
 func (a *Application) GetNote(id int) (note.Note, error) {
-	storedNode, err := a.storage.Get(id)
-	return storedNode, err
+	storedNote, err := a.storage.Get(id)
+	return storedNote, err
 }
 
 func (a *Application) ListNotes() ([]note.Note, error) {

@@ -17,7 +17,7 @@ func NewInMemoryStorage() *InMemoryStorage {
 	return &InMemoryStorage{notes: notes, nextID: 1}
 }
 
-func (s *InMemoryStorage) Create(input application.CreateNoteInput) (int, error) {
+func (s *InMemoryStorage) Create(input application.CreateNoteInput) (note.Note, error) {
 	unote := note.Note{
 		Title:     input.Title,
 		Content:   input.Content,
@@ -27,7 +27,7 @@ func (s *InMemoryStorage) Create(input application.CreateNoteInput) (int, error)
 	unote.ID = s.nextID
 	s.notes[unote.ID] = unote
 	s.nextID++
-	return unote.ID, nil
+	return unote, nil
 }
 
 func (s *InMemoryStorage) Get(id int) (note.Note, error) {
@@ -70,4 +70,3 @@ func (s *InMemoryStorage) Delete(id int) error {
 	delete(s.notes, id)
 	return nil
 }
-

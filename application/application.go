@@ -1,7 +1,6 @@
 package application
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/Mayankkaira/notes-api/note"
@@ -40,7 +39,7 @@ func NewApplication(storage Storage) *Application {
 func (a *Application) CreateNote(title, content string) (note.Note, error) {
 	var createdNote note.Note
 	if len(title) == 0 || len(content) == 0 {
-		return createdNote, fmt.Errorf("empty value error")
+		return createdNote, ErrInvalidInput
 	}
 	currentTime := time.Now()
 	noteInput := CreateNoteInput{
@@ -65,16 +64,16 @@ func (a *Application) ListNotes() ([]note.Note, error) {
 
 func (a *Application) UpdateNote(id int, title, content *string) error {
 	if title == nil && content == nil {
-		return fmt.Errorf("both fields can't be empty")
+		return ErrInvalidInput
 	}
 	if title != nil {
 		if len(*title) == 0 {
-			return fmt.Errorf("Invalid title")
+			return ErrInvalidInput
 		}
 	}
 	if content != nil {
 		if len(*content) == 0 {
-			return fmt.Errorf("Invalid content")
+			return ErrInvalidInput
 		}
 	}
 	updateNote := UpdateNoteInput{

@@ -86,6 +86,9 @@ func (a *Application) UpdateNote(id int, title, content *string) error {
 		UpdatedAt: time.Now(),
 	}
 	err := a.storage.Update(id, updateNote)
+	if errors.Is(err, ErrStorageNotFound) {
+		return ErrNoteNotFound
+	}
 	return err
 
 }

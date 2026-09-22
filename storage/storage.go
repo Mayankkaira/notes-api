@@ -1,8 +1,6 @@
 package storage
 
 import (
-	"fmt"
-
 	"github.com/Mayankkaira/notes-api/application"
 	"github.com/Mayankkaira/notes-api/note"
 )
@@ -49,7 +47,7 @@ func (s *InMemoryStorage) List() ([]note.Note, error) {
 func (s *InMemoryStorage) Update(id int, update application.UpdateNoteInput) error {
 	val, ok := s.notes[id]
 	if !ok {
-		return fmt.Errorf("Note with %d doesn't exist", id)
+		return application.ErrStorageNotFound
 	}
 	if update.Title != nil {
 		val.Title = *update.Title

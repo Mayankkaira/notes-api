@@ -33,7 +33,7 @@ func (s *InMemoryStorage) Create(input application.CreateNoteInput) (note.Note, 
 func (s *InMemoryStorage) Get(id int) (note.Note, error) {
 	val, ok := s.notes[id]
 	if !ok {
-		return val, ErrNotFound
+		return val, application.ErrStorageNotFound
 	}
 	return val, nil
 }
@@ -65,7 +65,7 @@ func (s *InMemoryStorage) Update(id int, update application.UpdateNoteInput) err
 func (s *InMemoryStorage) Delete(id int) error {
 	_, ok := s.notes[id]
 	if !ok {
-		return ErrNotFound
+		return application.ErrStorageNotFound
 	}
 	delete(s.notes, id)
 	return nil

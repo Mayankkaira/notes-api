@@ -1,6 +1,7 @@
 package application
 
 import (
+	"errors"
 	"time"
 
 	"github.com/Mayankkaira/notes-api/note"
@@ -54,6 +55,9 @@ func (a *Application) CreateNote(title, content string) (note.Note, error) {
 
 func (a *Application) GetNote(id int) (note.Note, error) {
 	storedNote, err := a.storage.Get(id)
+	if errors.Is(err, ErrStorageNotFound) {
+		return storedNote, ErrNoteNotFound
+	}
 	return storedNote, err
 }
 
@@ -88,5 +92,8 @@ func (a *Application) UpdateNote(id int, title, content *string) error {
 
 func (a *Application) DeleteNote(id int) error {
 	err := a.storage.Delete(id)
+	if errors.Is(err, ErrStorageNotFound) {
+		return ErrNoteNotFound
+	}
 	return err
 }

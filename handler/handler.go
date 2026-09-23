@@ -1,6 +1,12 @@
 package handler
 
-import "github.com/Mayankkaira/notes-api/application"
+import (
+	"encoding/json"
+	"log"
+	"net/http"
+
+	"github.com/Mayankkaira/notes-api/application"
+)
 
 type Handler struct {
 	application *application.Application
@@ -18,4 +24,25 @@ type CreateNoteRequest struct {
 
 type ErrorResponse struct {
 	Error string `json:"error"`
+}
+
+func WriteErrorResponse(w http.ResponseWriter, errVal ErrorResponse, code int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	encoder := json.NewEncoder(w)
+	err := encoder.Encode(errVal)
+	if err != nil {
+		log.Printf("failed to encode error response: %v", err)
+	}
+}
+
+func Create(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	request := CreateNoteRequest{}
+	err := decoder.Decode(&request)
+	if err != nil {
+		errorResponse := ErrorResponse{Error: err.Error()}
+		WriteErrorResponse(w, errorResponse, 400)
+		return
+	}
 }

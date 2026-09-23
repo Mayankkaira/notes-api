@@ -36,7 +36,7 @@ func WriteErrorResponse(w http.ResponseWriter, errVal ErrorResponse, code int) {
 	}
 }
 
-func Create(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	request := CreateNoteRequest{}
 	err := decoder.Decode(&request)
@@ -45,4 +45,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, errorResponse, 400)
 		return
 	}
+	h.application.CreateNote(request.Title, request.Content)
+
 }

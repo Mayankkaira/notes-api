@@ -58,14 +58,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	encoder := json.NewEncoder(w)
-	encodeErr := encoder.Encode(createNote)
-	if encodeErr != nil {
-		log.Printf("failed to encode note response %v", encodeErr)
-	}
-
+	WriteJSONResponse(w, 201, createNote)
 }
 
 func WriteJSONResponse(w http.ResponseWriter, code int, data any) {

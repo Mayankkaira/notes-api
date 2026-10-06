@@ -67,3 +67,13 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func WriteJSONResponse(w http.ResponseWriter, code int, data any) {
+	w.Header().Set("Content-Type", "applicatoin/json")
+	w.WriteHeader(http.StatusCreated)
+	encoder := json.NewEncoder(w)
+	encodeErr := encoder.Encode(data)
+	if encodeErr != nil {
+		log.Printf("failed to encode response %v", encodeErr)
+	}
+}

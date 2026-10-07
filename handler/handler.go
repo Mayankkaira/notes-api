@@ -70,3 +70,13 @@ func WriteJSONResponse(w http.ResponseWriter, code int, data any) {
 		log.Printf("failed to encode response %v", encodeErr)
 	}
 }
+
+func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
+	list, err := h.application.ListNotes()
+	if err != nil {
+		errorResponse := ErrorResponse{Error: "internal server error"}
+		WriteErrorResponse(w, errorResponse, http.StatusInternalServerError)
+		return
+	}
+	WriteJSONResponse(w, http.StatusOK, list)
+}

@@ -14,7 +14,8 @@ func main() {
 	app := application.NewApplication(newStorage)
 	newHandler := handler.NewHandler(app)
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST/notes", newHandler.Create)
+	mux.HandleFunc("POST /notes", newHandler.Create)
+	mux.HandleFunc("GET /notes", newHandler.List)
 	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
 		fmt.Println(err)

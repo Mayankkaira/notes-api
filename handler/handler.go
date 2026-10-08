@@ -96,11 +96,10 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 			errorResponse := ErrorResponse{Error: err.Error()}
 			WriteErrorResponse(w, errorResponse, http.StatusNotFound)
 			return
-		} else {
-			errorResponse := ErrorResponse{Error: "internal server error"}
-			WriteErrorResponse(w, errorResponse, http.StatusInternalServerError)
-			return
 		}
+		errorResponse := ErrorResponse{Error: "internal server error"}
+		WriteErrorResponse(w, errorResponse, http.StatusInternalServerError)
+		return
 	}
 	WriteJSONResponse(w, http.StatusOK, note)
 }

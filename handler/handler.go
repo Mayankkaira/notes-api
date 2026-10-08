@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/Mayankkaira/notes-api/application"
 )
@@ -79,4 +80,27 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	WriteJSONResponse(w, http.StatusOK, list)
+}
+
+func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	num, err := strconv.Atoi(id)
+	if err != nil {
+		errorResponse := ErrorResponse{Error: "invalid id"}
+		WriteErrorResponse(w, errorResponse, http.StatusBadRequest)
+		return
+	}
+	note, err := h.application.GetNote(num)
+	if err != nil {
+		if errors.Is(err, application.ErrNoteNotFound) {
+			errorResponse := ErrorResponse{Error: err.Error()}
+			WriteErrorResponse(w, errorResponse, http.StatusNotFound)
+			return
+		} else {
+			errorResponse := ErrorResponse{Error: "internal server error"}
+			WriteErrorResponse(w, errorResponse, http.StatusInternalServerError)
+			return
+		}
+	}
+	WriteJSONResponse(w, http.StatusOK, note)
 }

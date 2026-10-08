@@ -37,7 +37,7 @@ func (s *InMemoryStorage) Get(id int) (note.Note, error) {
 }
 
 func (s *InMemoryStorage) List() ([]note.Note, error) {
-	var noteSlice []note.Note
+	noteSlice := make([]note.Note, 0)
 	for _, value := range s.notes {
 		noteSlice = append(noteSlice, value)
 	}

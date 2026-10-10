@@ -44,10 +44,10 @@ func (s *InMemoryStorage) List() ([]note.Note, error) {
 	return noteSlice, nil
 }
 
-func (s *InMemoryStorage) Update(id int, update application.UpdateNoteInput) error {
+func (s *InMemoryStorage) Update(id int, update application.UpdateNoteInput) (note.Note, error) {
 	val, ok := s.notes[id]
 	if !ok {
-		return application.ErrStorageNotFound
+		return val, application.ErrStorageNotFound
 	}
 	if update.Title != nil {
 		val.Title = *update.Title
@@ -57,7 +57,7 @@ func (s *InMemoryStorage) Update(id int, update application.UpdateNoteInput) err
 	}
 	val.UpdatedAt = update.UpdatedAt
 	s.notes[id] = val
-	return nil
+	return val, nil
 }
 
 func (s *InMemoryStorage) Delete(id int) error {

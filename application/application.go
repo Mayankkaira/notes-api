@@ -24,7 +24,7 @@ type Storage interface {
 	Create(input CreateNoteInput) (note.Note, error)
 	Get(ID int) (note.Note, error)
 	List() ([]note.Note, error)
-	Update(ID int, updateInput UpdateNoteInput) error
+	Update(ID int, updateInput UpdateNoteInput) (note.Note, error)
 	Delete(ID int) error
 }
 
@@ -33,7 +33,7 @@ type Application struct {
 }
 
 func NewApplication(storage Storage) *Application {
-	app := &Application{storage: storage} 
+	app := &Application{storage: storage}
 	return app
 }
 
@@ -66,18 +66,19 @@ func (a *Application) ListNotes() ([]note.Note, error) {
 	return cNotes, err
 }
 
-func (a *Application) UpdateNote(id int, title, content *string) error {
+func (a *Application) UpdateNote(id int, title, content *string) (note.Note, error) {
+	var updatedNote note.Note
 	if title == nil && content == nil {
-		return ErrInvalidInput
+		return updatedNote, ErrInvalidInput
 	}
 	if title != nil {
 		if len(*title) == 0 {
-			return ErrInvalidInput
+			return updatedNote, ErrInvalidInput
 		}
 	}
 	if content != nil {
 		if len(*content) == 0 {
-			return ErrInvalidInput
+			return updatedNote, ErrInvalidInput
 		}
 	}
 	updateNote := UpdateNoteInput{
@@ -85,11 +86,11 @@ func (a *Application) UpdateNote(id int, title, content *string) error {
 		Content:   content,
 		UpdatedAt: time.Now(),
 	}
-	err := a.storage.Update(id, updateNote)
+	updatedNote, err := a.storage.Update(id, updateNote)
 	if errors.Is(err, ErrStorageNotFound) {
-		return ErrNoteNotFound
+		return updatedNote, ErrNoteNotFound
 	}
-	return err
+	return updatedNote, err
 
 }
 

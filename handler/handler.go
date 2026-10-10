@@ -108,3 +108,37 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 	WriteJSONResponse(w, http.StatusOK, note)
 }
+
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	num, err := strconv.Atoi(id)
+	if err != nil {
+		errorResponse := ErrorResponse{Error: "invalid id"}
+		WriteErrorResponse(w, errorResponse, http.StatusBadRequest)
+		return
+	}
+	decoder := json.NewDecoder(r.Body)
+	request := UpdateNoteRequest{}
+	decoderErr := decoder.Decode(&request)
+	if decoderErr != nil {
+		errorResponse := ErrorResponse{Error: "invalid JSON"}
+		WriteErrorResponse(w, errorResponse, http.StatusBadRequest)
+		return
+	}
+	updatedNote, err := h.application.UpdateNote(num, request.Title, request.Content)
+	if err != nil {
+		if errors.Is(err, application.ErrNoteNotFound) {
+			errorResponse := ErrorResponse{Error: err.Error()}
+			WriteErrorResponse(w, errorResponse, http.StatusNotFound)
+			return
+		} else if errors.Is(err, application.ErrInvalidInput) {
+			errorResponse := ErrorResponse{Error: err.Error()}
+			WriteErrorResponse(w, errorResponse, http.StatusBadRequest)
+			return
+		}
+		errorResponse := ErrorResponse{Error: "internal server error"}
+		WriteErrorResponse(w, errorResponse, http.StatusInternalServerError)
+		return
+	}
+	WriteJSONResponse(w, http.StatusOK, updatedNote)
+}

@@ -17,6 +17,7 @@ func main() {
 	mux.HandleFunc("POST /notes", newHandler.Create)
 	mux.HandleFunc("GET /notes", newHandler.List)
 	mux.HandleFunc("GET /notes/{id}", newHandler.Get)
+	mux.HandleFunc("PATCH /notes/{id}", newHandler.Update)
 	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
 		fmt.Println(err)

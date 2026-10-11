@@ -142,3 +142,26 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	WriteJSONResponse(w, http.StatusOK, updatedNote)
 }
+
+func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	num, err := strconv.Atoi(id)
+	if err != nil {
+		errorResponse := ErrorResponse{Error: "invalid id"}
+		WriteErrorResponse(w, errorResponse, http.StatusBadRequest)
+		return
+	}
+	err = h.application.DeleteNote(num)
+	if err != nil {
+		if errors.Is(err, application.ErrNoteNotFound) {
+			errorResponse := ErrorResponse{Error: err.Error()}
+			WriteErrorResponse(w, errorResponse, http.StatusNotFound)
+			return
+		}
+		errorResponse := ErrorResponse{Error: "internal server error"}
+		WriteErrorResponse(w, errorResponse, http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNoContent)
+}

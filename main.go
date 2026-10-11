@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/Mayankkaira/notes-api/application"
@@ -21,6 +21,6 @@ func main() {
 	mux.HandleFunc("DELETE /notes/{id}", newHandler.Delete)
 	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatalf("server failed: %v", err)
 	}
 }

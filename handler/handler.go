@@ -162,6 +162,5 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, errorResponse, http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNoContent)
 }

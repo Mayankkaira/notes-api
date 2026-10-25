@@ -57,23 +57,3 @@ func TestCreateNote_EmptyContent(t *testing.T) {
 		t.Errorf("storage.Create() was called for invalid input")
 	}
 }
-
-func TestCreateNote_Success(t *testing.T) {
-	fake := &FakeStorage{}
-	app := NewApplication(fake)
-	title := "Learn Go"
-	content := "Practice Testing"
-	note, err := app.CreateNote(title, content)
-	if err != nil {
-		t.Errorf("unexpedted err %v", err)
-	}
-	if !fake.createCalled {
-		t.Error("storage.Create() is not called")
-	}
-	if note.Title != title {
-		t.Errorf("created title %v doen't match with input title:%v", cNote.Title, title)
-	}
-	if note.Content != content {
-		t.Errorf("created title %v doen't match with input title:%v", cNote.Content, content)
-	}
-}

@@ -13,7 +13,7 @@ type FakeStorage struct {
 
 func (f *FakeStorage) Create(input CreateNoteInput) (note.Note, error) {
 	f.createCalled = true
-	return note.Note{Title: input.Title, Content: input.Content}, nil
+	return note.Note{Title: input.Title, Content: input.Content, CreatedAt: input.CreatedAt, UpdatedAt: input.UpdatedAt}, nil
 }
 
 func (f *FakeStorage) Delete(id int) error {
@@ -65,15 +65,24 @@ func TestCreateNote_Success(t *testing.T) {
 	content := "Practice Testing"
 	note, err := app.CreateNote(title, content)
 	if err != nil {
-		t.Fatalf("unexpected err %v", err)
+		t.Fatalf("unexpected error %v", err)
 	}
 	if !fake.createCalled {
 		t.Error("storage.Create() is not called")
 	}
 	if note.Title != title {
-		t.Errorf("created title %v doen't match with input title:%v", note.Title, title)
+		t.Errorf("created title %v doesn't match with input title:%v", note.Title, title)
 	}
 	if note.Content != content {
-		t.Errorf("created content %v doen't match with input content:%v", note.Content, content)
+		t.Errorf("created content %v doesgn't match with input content:%v", note.Content, content)
+	}
+	if note.CreatedAt.IsZero() {
+		t.Error("Note Created time should not be zero ")
+	}
+	if note.UpdatedAt.IsZero() {
+		t.Error("Note Updated time should not be zero")
+	}
+	if !note.CreatedAt.Equal(note.UpdatedAt) {
+		t.Error("created and updated time should be same")
 	}
 }

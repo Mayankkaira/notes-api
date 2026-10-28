@@ -76,3 +76,36 @@ func TestInMemoryStorage_Create_IncrementID(t *testing.T) {
 		t.Errorf("%v doesn't match with %v", rNote.Content, input2.Content)
 	}
 }
+
+func TestInMemory_Update_TitleOnly(t *testing.T) {
+	s := NewInMemoryStorage()
+	currentTime := time.Now()
+	input := application.CreateNoteInput{
+		Title:     "Learn Go",
+		Content:   "Practise Testing",
+		CreatedAt: currentTime,
+		UpdatedAt: currentTime,
+	}
+	rNote, err := s.Create(input)
+	if err != nil {
+		t.Fatalf("Create note %v", err)
+	}
+	newTitle := "Learn concurrency"
+	updatedInput := application.UpdateNoteInput{
+		Title:     &newTitle,
+		UpdatedAt: time.Now(),
+	}
+	uNote, err := s.Update(rNote.ID, updatedInput)
+	if err != nil {
+		t.Fatalf("update note %v", err)
+	}
+	if uNote.Title != newTitle {
+		t.Errorf("Updated Title: %q want %q", uNote.Title, newTitle)
+	}
+	if uNote.Content != rNote.Content {
+		t.Errorf("updated content = %q, want %q", uNote.Content, rNote.Content)
+	}
+	if !uNote.UpdatedAt.Equal(updatedInput.UpdatedAt) {
+		t.Errorf("updated time = %v, want %v", uNote.UpdatedAt, updatedInput.UpdatedAt)
+	}
+}

@@ -195,3 +195,17 @@ func TestInMemory_Get_NotFound(t *testing.T) {
 		t.Fatalf("Get() %v, want %v", err, application.ErrStorageNotFound)
 	}
 }
+
+func TestInMemory_List_Empty(t *testing.T) {
+	s := NewInMemoryStorage()
+	rNote, err := s.List()
+	if err != nil {
+		t.Fatalf("list() %v", err)
+	}
+	if len(rNote) != 0 {
+		t.Fatalf("list() returned %d notes, want 0", len(rNote))
+	}
+	if rNote == nil {
+		t.Error("List() returned nil slice, want non-nil empty slice")
+	}
+}

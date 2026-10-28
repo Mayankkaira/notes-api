@@ -156,3 +156,26 @@ func TestInMemoryStorage_Update_Nofound(t *testing.T) {
 		t.Fatalf("Update() error = %v, want %v", err, application.ErrStorageNotFound)
 	}
 }
+
+func TestInMemoryStorage_Delete(t *testing.T) {
+	s := NewInMemoryStorage()
+	currentTime := time.Now()
+	input := application.CreateNoteInput{
+		Title:     "Learn Go",
+		Content:   "Practise Test",
+		CreatedAt: currentTime,
+		UpdatedAt: currentTime,
+	}
+	rNote, err := s.Create(input)
+	if err != nil {
+		t.Fatalf("create note:%v", err)
+	}
+	err = s.Delete(rNote.ID)
+	if err != nil {
+		t.Fatalf("Delete() error: %v", err)
+	}
+	_, err = s.Get(rNote.ID)
+	if !errors.Is(err, application.ErrStorageNotFound) {
+		t.Errorf("error= %v, want %v", err, application.ErrStorageNotFound)
+	}
+}

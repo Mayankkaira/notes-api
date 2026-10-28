@@ -209,3 +209,63 @@ func TestInMemory_List_Empty(t *testing.T) {
 		t.Error("List() returned nil slice, want non-nil empty slice")
 	}
 }
+
+func TestInMemory_List_Populated(t *testing.T) {
+	s := NewInMemoryStorage()
+	currentTime := time.Now()
+	input1 := application.CreateNoteInput{
+		Title:     "Learn Go",
+		Content:   "Practise Testing",
+		CreatedAt: currentTime,
+		UpdatedAt: currentTime,
+	}
+	input2 := application.CreateNoteInput{
+		Title:     "Learn Concurrency",
+		Content:   "Practise Channels",
+		CreatedAt: currentTime,
+		UpdatedAt: currentTime,
+	}
+	rNote1, err1 := s.Create(input1)
+	rNote2, err2 := s.Create(input2)
+	if err1 != nil {
+		t.Fatalf("create() %v", err1)
+	}
+	if err2 != nil {
+		t.Fatalf("create() %v", err2)
+	}
+	lNote, err := s.List()
+	if err != nil {
+		t.Fatalf("List()%v", err)
+	}
+	if len(lNote) != 2 {
+		t.Errorf("list() returned %d notes want 2", len(lNote))
+	}
+	foundNote1 := false
+	foundNote2 := false
+	for _, value := range lNote {
+		if value.ID == rNote1.ID {
+			foundNote1 = true
+			if value.Title != input1.Title {
+				t.Errorf("List()returned %v want %v", value.Title, input1.Title)
+			}
+			if value.Content != input1.Content {
+				t.Errorf("List()returned %v want %v", value.Content, input1.Content)
+			}
+		}
+		if value.ID == rNote2.ID {
+			foundNote2 = true
+			if value.Title != input2.Title {
+				t.Errorf("List()returned %v want %v", value.Title, input2.Title)
+			}
+			if value.Content != input2.Content {
+				t.Errorf("List()returned %v want %v", value.Content, input2.Content)
+			}
+		}
+	}
+	if !foundNote1 {
+		t.Error("created note1 not found")
+	}
+	if !foundNote2 {
+		t.Error("created note2 not found")
+	}
+}

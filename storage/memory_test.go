@@ -100,10 +100,43 @@ func TestInMemory_Update_TitleOnly(t *testing.T) {
 		t.Fatalf("update note %v", err)
 	}
 	if uNote.Title != newTitle {
-		t.Errorf("Updated Title: %q want %q", uNote.Title, newTitle)
+		t.Errorf("updated Title: %q want %q", uNote.Title, newTitle)
 	}
 	if uNote.Content != rNote.Content {
 		t.Errorf("updated content = %q, want %q", uNote.Content, rNote.Content)
+	}
+	if !uNote.UpdatedAt.Equal(updatedInput.UpdatedAt) {
+		t.Errorf("updated time = %v, want %v", uNote.UpdatedAt, updatedInput.UpdatedAt)
+	}
+}
+
+func TestInMemory_Update_ContentOnly(t *testing.T) {
+	s := NewInMemoryStorage()
+	currentTime := time.Now()
+	input := application.CreateNoteInput{
+		Title:     "Learn Go",
+		Content:   "Practise Testing",
+		CreatedAt: currentTime,
+		UpdatedAt: currentTime,
+	}
+	rNote, err := s.Create(input)
+	if err != nil {
+		t.Fatalf("Create note %v", err)
+	}
+	newContent := "testing update"
+	updatedInput := application.UpdateNoteInput{
+		Content:   &newContent,
+		UpdatedAt: time.Now(),
+	}
+	uNote, err := s.Update(rNote.ID, updatedInput)
+	if err != nil {
+		t.Fatalf("update note %v", err)
+	}
+	if uNote.Content != newContent {
+		t.Errorf("updated content: %q want %q", uNote.Content, newContent)
+	}
+	if uNote.Title != rNote.Title {
+		t.Errorf("updated Title = %q, want %q", uNote.Title, rNote.Title)
 	}
 	if !uNote.UpdatedAt.Equal(updatedInput.UpdatedAt) {
 		t.Errorf("updated time = %v, want %v", uNote.UpdatedAt, updatedInput.UpdatedAt)

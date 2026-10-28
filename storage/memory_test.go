@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -140,5 +141,18 @@ func TestInMemory_Update_ContentOnly(t *testing.T) {
 	}
 	if !uNote.UpdatedAt.Equal(updatedInput.UpdatedAt) {
 		t.Errorf("updated time = %v, want %v", uNote.UpdatedAt, updatedInput.UpdatedAt)
+	}
+}
+
+func TestInMemoryStorage_Update_Nofound(t *testing.T) {
+	s := NewInMemoryStorage()
+	newTitle := "Learn go"
+	updatedInput := application.UpdateNoteInput{
+		Title:     &newTitle,
+		UpdatedAt: time.Now(),
+	}
+	_, err := s.Update(2, updatedInput)
+	if !errors.Is(err, application.ErrStorageNotFound) {
+		t.Fatalf("Update() error = %v, want %v", err, application.ErrStorageNotFound)
 	}
 }

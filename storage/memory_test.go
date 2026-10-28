@@ -187,3 +187,11 @@ func TestInMemoryStorage_Delete_NotFound(t *testing.T) {
 		t.Fatalf("delete() %v, want %v", err, application.ErrStorageNotFound)
 	}
 }
+
+func TestInMemory_Get_NotFound(t *testing.T) {
+	s := NewInMemoryStorage()
+	_, err := s.Get(2)
+	if !errors.Is(err, application.ErrStorageNotFound) {
+		t.Fatalf("Get() %v, want %v", err, application.ErrStorageNotFound)
+	}
+}

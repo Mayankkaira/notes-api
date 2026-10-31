@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -22,7 +23,7 @@ func TestHandler_Create(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	h.Create(recorder, req)
 	if recorder.Code != http.StatusCreated {
-		t.Fatalf("status code = %d, want %d", http.StatusCreated, http.StatusCreated)
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusCreated)
 	}
 	if recorder.Header().Get("Content-Type") != "application/json" {
 		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
@@ -42,5 +43,22 @@ func TestHandler_Create(t *testing.T) {
 }
 
 func TestHandler_Create_Invalid_JSON(t *testing.T) {
-
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"Learn Go","content":`))
+	recorder := httptest.NewRecorder()
+	h.Create(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusCreated)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	rNote := note.Note{}
+	err := decoder.Decode(&rNote)
+	if !errors.Is(err, errors.New("invalid json")) {
+		t.Fatalf("create decoding error:%v", err)
+	}
 }

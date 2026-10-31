@@ -60,4 +60,7 @@ func TestHandler_Create_Invalid_JSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create decoding error:%v", err)
 	}
+	if eNote.Error != "invalid JSON" {
+		t.Errorf("create() error: %v want invalid JSON", eNote.Error)
+	}
 }

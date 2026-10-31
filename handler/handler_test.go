@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -50,15 +49,15 @@ func TestHandler_Create_Invalid_JSON(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	h.Create(recorder, req)
 	if recorder.Code != http.StatusBadRequest {
-		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusCreated)
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusBadRequest)
 	}
 	if recorder.Header().Get("Content-Type") != "application/json" {
 		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
 	}
 	decoder := json.NewDecoder(recorder.Body)
-	rNote := note.Note{}
-	err := decoder.Decode(&rNote)
-	if !errors.Is(err, errors.New("invalid json")) {
+	eNote := ErrorResponse{}
+	err := decoder.Decode(&eNote)
+	if err != nil {
 		t.Fatalf("create decoding error:%v", err)
 	}
 }

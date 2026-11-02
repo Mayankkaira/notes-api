@@ -229,11 +229,11 @@ func TestHandler_Get_Success(t *testing.T) {
 	req1.SetPathValue("id", "1")
 	recorder1 := httptest.NewRecorder()
 	h.Get(recorder1, req1)
-	if recorder.Code != http.StatusOK {
-		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusOK)
+	if recorder1.Code != http.StatusOK {
+		t.Fatalf("status code = %d, want %d", recorder1.Code, http.StatusOK)
 	}
-	if recorder.Header().Get("Content-Type") != "application/json" {
-		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	if recorder1.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder1.Header().Get("Content-Type"))
 	}
 	decoder := json.NewDecoder(recorder1.Body)
 	rNote := note.Note{}

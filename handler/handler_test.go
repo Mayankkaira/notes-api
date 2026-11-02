@@ -88,3 +88,27 @@ func TestHandler_Create_Invalid_Input(t *testing.T) {
 		t.Errorf("invalid input error: %v, want %v", eNote.Error, application.ErrInvalidInput.Error())
 	}
 }
+
+func TestHandler_Create_EmptyContent(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"Learn go","content":""`))
+	recorder := httptest.NewRecorder()
+	h.Create(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusBadRequest)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	eNote := ErrorResponse{}
+	err := decoder.Decode(&eNote)
+	if err != nil {
+		t.Fatalf("create decoding error:%v", err)
+	}
+	if eNote.Error != application.ErrInvalidInput.Error() {
+		t.Errorf("invalid input error: %v, want %v", eNote.Error, application.ErrInvalidInput.Error())
+	}
+}

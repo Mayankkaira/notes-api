@@ -34,10 +34,10 @@ func TestHandler_Create(t *testing.T) {
 		t.Fatalf("create decoding error:%v", err)
 	}
 	if rNote.Title != title {
-		t.Errorf("title:%v want Learn Go", rNote.Title)
+		t.Errorf("title: %q want %q", rNote.Title, title)
 	}
 	if rNote.Content != content {
-		t.Errorf("Content:%v want Practice testing", rNote.Content)
+		t.Errorf("Content: %q want %q", rNote.Content, content)
 	}
 }
 
@@ -245,9 +245,9 @@ func TestHandler_Get_Success(t *testing.T) {
 		t.Fatalf("Get() id: %d, want %d", rNote.ID, 1)
 	}
 	if rNote.Title != title {
-		t.Errorf("title:%v want Learn Go", rNote.Title)
+		t.Errorf("title: %q want %q", rNote.Title, title)
 	}
 	if rNote.Content != content {
-		t.Errorf("Content:%v want Practice testing", rNote.Content)
+		t.Errorf("Content: %q want %q", rNote.Content, content)
 	}
 }

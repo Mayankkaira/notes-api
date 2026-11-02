@@ -69,7 +69,7 @@ func TestHandler_Create_Invalid_Input(t *testing.T) {
 	s := storage.NewInMemoryStorage()
 	app := application.NewApplication(s)
 	h := NewHandler(app)
-	req := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"","content":"Practice testing"`))
+	req := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"","content":"Practice testing"}`))
 	recorder := httptest.NewRecorder()
 	h.Create(recorder, req)
 	if recorder.Code != http.StatusBadRequest {
@@ -93,7 +93,7 @@ func TestHandler_Create_EmptyContent(t *testing.T) {
 	s := storage.NewInMemoryStorage()
 	app := application.NewApplication(s)
 	h := NewHandler(app)
-	req := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"Learn go","content":""`))
+	req := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"Learn go","content":""}`))
 	recorder := httptest.NewRecorder()
 	h.Create(recorder, req)
 	if recorder.Code != http.StatusBadRequest {

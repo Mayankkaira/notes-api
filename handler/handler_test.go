@@ -112,3 +112,30 @@ func TestHandler_Create_EmptyContent(t *testing.T) {
 		t.Errorf("invalid input error: %v, want %v", eNote.Error, application.ErrInvalidInput.Error())
 	}
 }
+
+func TestHandler_List_Empty(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodGet, "/notes", nil)
+	recorder := httptest.NewRecorder()
+	h.List(recorder, req)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusOK)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	rNote := []note.Note{}
+	err := decoder.Decode(&rNote)
+	if err != nil {
+		t.Fatalf("List decoding error:%v", err)
+	}
+	if len(rNote) != 0 {
+		t.Fatalf("List returned: %d, want 0", len(rNote))
+	}
+	if rNote == nil {
+		t.Fatalf("List() returned nil slice, want non-nil empty slice")
+	}
+}

@@ -209,3 +209,45 @@ func TestHandler_List_Populated(t *testing.T) {
 		t.Error("created note2 not found")
 	}
 }
+
+func TestHandler_Get_Success(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	title := "Learn Go"
+	content := "Practice testing"
+	req := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"Learn Go","content":"Practice testing"}`))
+	recorder := httptest.NewRecorder()
+	h.Create(recorder, req)
+	if recorder.Code != http.StatusCreated {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusCreated)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	req1 := httptest.NewRequest(http.MethodGet, "/notes/1", nil)
+	req1.SetPathValue("id", "1")
+	recorder1 := httptest.NewRecorder()
+	h.Get(recorder1, req1)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusOK)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder1.Body)
+	rNote := note.Note{}
+	err := decoder.Decode(&rNote)
+	if err != nil {
+		t.Fatalf("Get decoding error:%v", err)
+	}
+	if rNote.ID != 1 {
+		t.Fatalf("Get() id: %d, want %d", rNote.ID, 1)
+	}
+	if rNote.Title != title {
+		t.Errorf("title:%v want Learn Go", rNote.Title)
+	}
+	if rNote.Content != content {
+		t.Errorf("Content:%v want Practice testing", rNote.Content)
+	}
+}

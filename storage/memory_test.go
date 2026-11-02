@@ -144,7 +144,7 @@ func TestInMemory_Update_ContentOnly(t *testing.T) {
 	}
 }
 
-func TestInMemoryStorage_Update_Nofound(t *testing.T) {
+func TestInMemoryStorage_Update_Notfound(t *testing.T) {
 	s := NewInMemoryStorage()
 	newTitle := "Learn go"
 	updatedInput := application.UpdateNoteInput{

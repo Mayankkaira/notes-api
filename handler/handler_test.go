@@ -251,3 +251,28 @@ func TestHandler_Get_Success(t *testing.T) {
 		t.Errorf("Content: %q want %q", rNote.Content, content)
 	}
 }
+
+func TestHandler_Get_NotFound(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodGet, "/notes/1", nil)
+	req.SetPathValue("id", "1")
+	recorder := httptest.NewRecorder()
+	h.Get(recorder, req)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusNotFound)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	errNote := ErrorResponse{}
+	err := decoder.Decode(&errNote)
+	if err != nil {
+		t.Fatalf("Get decoding error:%v", err)
+	}
+	if errNote.Error != application.ErrNoteNotFound.Error() {
+		t.Errorf("Get(): %v, want %v", errNote.Error, application.ErrNoteNotFound.Error())
+	}
+}

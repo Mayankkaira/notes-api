@@ -64,3 +64,27 @@ func TestHandler_Create_Invalid_JSON(t *testing.T) {
 		t.Errorf("create() error: %v want invalid JSON", eNote.Error)
 	}
 }
+
+func TestHandler_Create_Invalid_Input(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"","content":"Practice testing"`))
+	recorder := httptest.NewRecorder()
+	h.Create(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusBadRequest)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	eNote := ErrorResponse{}
+	err := decoder.Decode(&eNote)
+	if err != nil {
+		t.Fatalf("create decoding error:%v", err)
+	}
+	if recorder.Code != http.StatusBadRequest {
+		t.Errorf("status code : %d, want %d", recorder.Code, http.StatusBadRequest)
+	}
+}

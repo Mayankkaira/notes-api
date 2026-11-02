@@ -84,7 +84,7 @@ func TestHandler_Create_Invalid_Input(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create decoding error:%v", err)
 	}
-	if recorder.Code != http.StatusBadRequest {
-		t.Errorf("status code : %d, want %d", recorder.Code, http.StatusBadRequest)
+	if eNote.Error != application.ErrInvalidInput.Error() {
+		t.Errorf("invalid input error: %v, want %v", eNote.Error, application.ErrInvalidInput.Error())
 	}
 }

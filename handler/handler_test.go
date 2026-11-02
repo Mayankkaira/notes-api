@@ -139,3 +139,73 @@ func TestHandler_List_Empty(t *testing.T) {
 		t.Fatalf("List() returned nil slice, want non-nil empty slice")
 	}
 }
+
+func TestHandler_List_Populated(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req1 := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"Learn Go","content":"Practice testing"}`))
+	recorder1 := httptest.NewRecorder()
+	h.Create(recorder1, req1)
+	if recorder1.Code != http.StatusCreated {
+		t.Fatalf("status code = %d, want %d", recorder1.Code, http.StatusCreated)
+	}
+	if recorder1.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder1.Header().Get("Content-Type"))
+	}
+	req2 := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"Learn HTTP","content":"Build REST APIs"}`))
+	recorder2 := httptest.NewRecorder()
+	h.Create(recorder2, req2)
+	if recorder2.Code != http.StatusCreated {
+		t.Fatalf("status code = %d, want %d", recorder2.Code, http.StatusCreated)
+	}
+	if recorder2.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder2.Header().Get("Content-Type"))
+	}
+	req := httptest.NewRequest(http.MethodGet, "/notes", nil)
+	recorder := httptest.NewRecorder()
+	h.List(recorder, req)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusOK)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	rNote := []note.Note{}
+	decoder := json.NewDecoder(recorder.Body)
+	err := decoder.Decode(&rNote)
+	if err != nil {
+		t.Fatalf("list() decoder error: %v", err)
+	}
+	if len(rNote) != 2 {
+		t.Fatalf("list() returned: %d want 2", len(rNote))
+	}
+	foundNote1 := false
+	foundNote2 := false
+	for _, value := range rNote {
+		if value.ID == 1 {
+			foundNote1 = true
+			if value.Title != "Learn Go" {
+				t.Errorf("List() returned %v want %q", value.Title, "Learn Go")
+			}
+			if value.Content != "Practice testing" {
+				t.Errorf("List() returned %v want %q", value.Content, "Practice testing")
+			}
+		}
+		if value.ID == 2 {
+			foundNote2 = true
+			if value.Title != "Learn HTTP" {
+				t.Errorf("List()returned %q want %q", value.Title, "Learn HTTP")
+			}
+			if value.Content != "Build REST APIs" {
+				t.Errorf("List()returned %q want %q", value.Content, "Build REST APIs")
+			}
+		}
+	}
+	if !foundNote1 {
+		t.Error("created note1 not found")
+	}
+	if !foundNote2 {
+		t.Error("created note2 not found")
+	}
+}

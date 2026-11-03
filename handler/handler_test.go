@@ -381,3 +381,43 @@ func TestHandler_Update_TitleOnly(t *testing.T) {
 		t.Errorf("content: %q, want %q", rNote.Content, "Practice testing")
 	}
 }
+
+func TestHandler_Update_ContentOnly(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"Learn Go","content":"Practice testing"}`))
+	recorder := httptest.NewRecorder()
+	h.Create(recorder, req)
+	if recorder.Code != http.StatusCreated {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusCreated)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	req1 := httptest.NewRequest(http.MethodPatch, "/notes/1", strings.NewReader(`{"content":"Build REST APIs"}`))
+	req1.SetPathValue("id", "1")
+	recorder1 := httptest.NewRecorder()
+	h.Update(recorder1, req1)
+	if recorder1.Code != http.StatusOK {
+		t.Fatalf("status code = %d, want %d", recorder1.Code, http.StatusOK)
+	}
+	if recorder1.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder1.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder1.Body)
+	rNote := note.Note{}
+	err := decoder.Decode(&rNote)
+	if err != nil {
+		t.Fatalf("Update decoding error:%v", err)
+	}
+	if rNote.ID != 1 {
+		t.Fatalf("note id: %d want %d", rNote.ID, 1)
+	}
+	if rNote.Title != "Learn Go" {
+		t.Errorf("title: %q, want %q", rNote.Title, "Learn Go")
+	}
+	if rNote.Content != "Build REST APIs" {
+		t.Errorf("content: %q, want %q", rNote.Content, "Build REST APIs")
+	}
+}

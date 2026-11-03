@@ -521,3 +521,85 @@ func TestHandler_Update_EmptyRequest(t *testing.T) {
 		t.Errorf("Update(): %q, want %q", errNote.Error, application.ErrInvalidInput.Error())
 	}
 }
+
+func TestHandler_Update_EmptyTitle(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodPatch, "/notes/1", strings.NewReader(`{"title":"","content":"Practice testing"}`))
+	req.SetPathValue("id", "1")
+	recorder := httptest.NewRecorder()
+	h.Update(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusBadRequest)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	errNote := ErrorResponse{}
+	err := decoder.Decode(&errNote)
+	if err != nil {
+		t.Fatalf("Update decoding error:%v", err)
+	}
+	if errNote.Error != application.ErrInvalidInput.Error() {
+		t.Errorf("Update(): %q, want %q", errNote.Error, application.ErrInvalidInput.Error())
+	}
+}
+
+func TestHandler_Update_EmptyContent(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodPatch, "/notes/1", strings.NewReader(`{"title":"Learn Go","content":""}`))
+	req.SetPathValue("id", "1")
+	recorder := httptest.NewRecorder()
+	h.Update(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusBadRequest)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	errNote := ErrorResponse{}
+	err := decoder.Decode(&errNote)
+	if err != nil {
+		t.Fatalf("Update decoding error:%v", err)
+	}
+	if errNote.Error != application.ErrInvalidInput.Error() {
+		t.Errorf("Update(): %q, want %q", errNote.Error, application.ErrInvalidInput.Error())
+	}
+}
+
+func TestHandler_Delete_Success(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"Learn Go","content":"Practice testing"}`))
+	recorder := httptest.NewRecorder()
+	h.Create(recorder, req)
+	if recorder.Code != http.StatusCreated {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusCreated)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	req1 := httptest.NewRequest(http.MethodDelete, "/notes/1", nil)
+	req1.SetPathValue("id", "1")
+	recorder1 := httptest.NewRecorder()
+	h.Delete(recorder1, req1)
+	if recorder1.Code != http.StatusNoContent {
+		t.Fatalf("status code = %d, want %d", recorder1.Code, http.StatusNoContent)
+	}
+	if recorder1.Body.Len() != 0 {
+		t.Errorf("response body = %q, want empty body", recorder1.Body.String())
+	}
+	req2 := httptest.NewRequest(http.MethodGet, "/notes/1", nil)
+	req2.SetPathValue("id", "1")
+	recorder2 := httptest.NewRecorder()
+	h.Get(recorder2, req2)
+	if recorder2.Code != http.StatusNotFound {
+		t.Fatalf("status code = %d, want %d", recorder2.Code, http.StatusNotFound)
+	}
+}

@@ -331,6 +331,9 @@ func TestHandler_Update_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Update decoding error:%v", err)
 	}
+	if rNote.ID != 1 {
+		t.Fatalf("note id: %d want %d", rNote.ID, 1)
+	}
 	if rNote.Title != "Learn Advance Go" {
 		t.Errorf("title: %q, want %q", rNote.Title, "Learn Advance Go")
 	}

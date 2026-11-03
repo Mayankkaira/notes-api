@@ -496,3 +496,28 @@ func TestHandler_Update_InvalidJSON(t *testing.T) {
 		t.Errorf("Update(): %q, want %q", errNote.Error, "invalid JSON")
 	}
 }
+
+func TestHandler_Update_EmptyRequest(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodPatch, "/notes/1", strings.NewReader(`{}`))
+	req.SetPathValue("id", "1")
+	recorder := httptest.NewRecorder()
+	h.Update(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusBadRequest)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	errNote := ErrorResponse{}
+	err := decoder.Decode(&errNote)
+	if err != nil {
+		t.Fatalf("Update decoding error:%v", err)
+	}
+	if errNote.Error != application.ErrInvalidInput.Error() {
+		t.Errorf("Update(): %q, want %q", errNote.Error, application.ErrInvalidInput.Error())
+	}
+}

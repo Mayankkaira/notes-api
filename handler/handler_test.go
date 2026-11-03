@@ -421,3 +421,28 @@ func TestHandler_Update_ContentOnly(t *testing.T) {
 		t.Errorf("content: %q, want %q", rNote.Content, "Build REST APIs")
 	}
 }
+
+func TestHandler_Update_NotFound(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodPatch, "/notes/999", strings.NewReader(`{"title":"Learn Advance Go"}`))
+	req.SetPathValue("id", "999")
+	recorder := httptest.NewRecorder()
+	h.Update(recorder, req)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusNotFound)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	errNote := ErrorResponse{}
+	err := decoder.Decode(&errNote)
+	if err != nil {
+		t.Fatalf("Update decoding error:%v", err)
+	}
+	if errNote.Error != application.ErrNoteNotFound.Error() {
+		t.Errorf("Update(): %v, want %v", errNote.Error, application.ErrNoteNotFound.Error())
+	}
+}

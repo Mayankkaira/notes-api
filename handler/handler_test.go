@@ -338,6 +338,6 @@ func TestHandler_Update_Success(t *testing.T) {
 		t.Errorf("title: %q, want %q", rNote.Title, "Learn Advance Go")
 	}
 	if rNote.Content != "Practice concurrency" {
-		t.Errorf("title: %q, want %q", rNote.Content, "Practice concurrency")
+		t.Errorf("content: %q, want %q", rNote.Content, "Practice concurrency")
 	}
 }

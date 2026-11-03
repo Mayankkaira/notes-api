@@ -443,6 +443,56 @@ func TestHandler_Update_NotFound(t *testing.T) {
 		t.Fatalf("Update decoding error:%v", err)
 	}
 	if errNote.Error != application.ErrNoteNotFound.Error() {
-		t.Errorf("Update(): %v, want %v", errNote.Error, application.ErrNoteNotFound.Error())
+		t.Errorf("Update(): %q, want %q", errNote.Error, application.ErrNoteNotFound.Error())
+	}
+}
+
+func TestHandler_Update_InvalidID(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodPatch, "/notes/abc", strings.NewReader(`{"title":"Learn Advance Go"}`))
+	req.SetPathValue("id", "abc")
+	recorder := httptest.NewRecorder()
+	h.Update(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusBadRequest)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	errNote := ErrorResponse{}
+	err := decoder.Decode(&errNote)
+	if err != nil {
+		t.Fatalf("Update decoding error:%v", err)
+	}
+	if errNote.Error != "invalid id" {
+		t.Errorf("Update(): %q, want %q", errNote.Error, "invalid id")
+	}
+}
+
+func TestHandler_Update_InvalidJSON(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodPatch, "/notes/1", strings.NewReader(`{"title":"Learn Go"`))
+	req.SetPathValue("id", "1")
+	recorder := httptest.NewRecorder()
+	h.Update(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusBadRequest)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	errNote := ErrorResponse{}
+	err := decoder.Decode(&errNote)
+	if err != nil {
+		t.Fatalf("Update decoding error:%v", err)
+	}
+	if errNote.Error != "invalid JSON" {
+		t.Errorf("Update(): %q, want %q", errNote.Error, "invalid JSON")
 	}
 }

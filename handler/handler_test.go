@@ -603,3 +603,28 @@ func TestHandler_Delete_Success(t *testing.T) {
 		t.Fatalf("status code = %d, want %d", recorder2.Code, http.StatusNotFound)
 	}
 }
+
+func TestHandler_Delete_NotFound(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodDelete, "/notes/999", nil)
+	req.SetPathValue("id", "999")
+	recorder := httptest.NewRecorder()
+	h.Delete(recorder, req)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusNotFound)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	errNote := ErrorResponse{}
+	err := decoder.Decode(&errNote)
+	if err != nil {
+		t.Fatalf("delete() decoder error: %v", err)
+	}
+	if errNote.Error != application.ErrNoteNotFound.Error() {
+		t.Errorf("delete(): %q, want %q", errNote.Error, application.ErrNoteNotFound.Error())
+	}
+}

@@ -628,3 +628,28 @@ func TestHandler_Delete_NotFound(t *testing.T) {
 		t.Errorf("delete(): %q, want %q", errNote.Error, application.ErrNoteNotFound.Error())
 	}
 }
+
+func TestHandler_Delete_InvalidID(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := NewHandler(app)
+	req := httptest.NewRequest(http.MethodDelete, "/notes/abc", nil)
+	req.SetPathValue("id", "abc")
+	recorder := httptest.NewRecorder()
+	h.Delete(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusBadRequest)
+	}
+	if recorder.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
+	}
+	decoder := json.NewDecoder(recorder.Body)
+	errNote := ErrorResponse{}
+	err := decoder.Decode(&errNote)
+	if err != nil {
+		t.Fatalf("delete() decoder error: %v", err)
+	}
+	if errNote.Error != "invalid id" {
+		t.Errorf("delete(): %q, want %q", errNote.Error, "invalid id")
+	}
+}

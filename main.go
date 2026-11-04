@@ -13,12 +13,7 @@ func main() {
 	newStorage := storage.NewInMemoryStorage()
 	app := application.NewApplication(newStorage)
 	newHandler := handler.NewHandler(app)
-	mux := http.NewServeMux()
-	mux.HandleFunc("POST /notes", newHandler.Create)
-	mux.HandleFunc("GET /notes", newHandler.List)
-	mux.HandleFunc("GET /notes/{id}", newHandler.Get)
-	mux.HandleFunc("PATCH /notes/{id}", newHandler.Update)
-	mux.HandleFunc("DELETE /notes/{id}", newHandler.Delete)
+	mux := NewRouter(newHandler)
 	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
 		log.Fatalf("server failed: %v", err)

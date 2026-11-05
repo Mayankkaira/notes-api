@@ -23,7 +23,7 @@ func TestRouter_Routes(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"Learn Go","content":"Practice testing"}`))
 		router.ServeHTTP(recorder, req)
 		if recorder.Code != http.StatusCreated {
-			t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusCreated)
+			t.Fatalf("status = %d, want %d", recorder.Code, http.StatusCreated)
 		}
 		if recorder.Header().Get("Content-Type") != "application/json" {
 			t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
@@ -38,7 +38,7 @@ func TestRouter_Routes(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/notes", nil)
 		router.ServeHTTP(recorder, req)
 		if recorder.Code != http.StatusOK {
-			t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusOK)
+			t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
 		}
 		if recorder.Header().Get("Content-Type") != "application/json" {
 			t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
@@ -66,7 +66,7 @@ func TestRouter_Routes(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/notes", strings.NewReader(`{"title":"Learn Go","content":"Practice testing"}`))
 		router.ServeHTTP(recorder, req)
 		if recorder.Code != http.StatusCreated {
-			t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusCreated)
+			t.Fatalf("status = %d, want %d", recorder.Code, http.StatusCreated)
 		}
 		if recorder.Header().Get("Content-Type") != "application/json" {
 			t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
@@ -75,7 +75,7 @@ func TestRouter_Routes(t *testing.T) {
 		req1 := httptest.NewRequest(http.MethodGet, "/notes/1", nil)
 		router.ServeHTTP(recorder1, req1)
 		if recorder1.Code != http.StatusOK {
-			t.Fatalf("status code = %d, want %d", recorder1.Code, http.StatusOK)
+			t.Fatalf("status = %d, want %d", recorder1.Code, http.StatusOK)
 		}
 		if recorder1.Header().Get("Content-Type") != "application/json" {
 			t.Fatalf("Content-Type = %v,want application/json ", recorder1.Header().Get("Content-Type"))
@@ -105,7 +105,7 @@ func TestRouter_Routes(t *testing.T) {
 		recorder := httptest.NewRecorder()
 		router.ServeHTTP(recorder, req)
 		if recorder.Code != http.StatusCreated {
-			t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusCreated)
+			t.Fatalf("status = %d, want %d", recorder.Code, http.StatusCreated)
 		}
 		if recorder.Header().Get("Content-Type") != "application/json" {
 			t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
@@ -114,7 +114,7 @@ func TestRouter_Routes(t *testing.T) {
 		recorder1 := httptest.NewRecorder()
 		router.ServeHTTP(recorder1, req1)
 		if recorder1.Code != http.StatusOK {
-			t.Fatalf("status code = %d, want %d", recorder1.Code, http.StatusOK)
+			t.Fatalf("status = %d, want %d", recorder1.Code, http.StatusOK)
 		}
 		if recorder1.Header().Get("Content-Type") != "application/json" {
 			t.Fatalf("Content-Type = %v,want application/json ", recorder1.Header().Get("Content-Type"))
@@ -144,7 +144,7 @@ func TestRouter_Routes(t *testing.T) {
 		recorder := httptest.NewRecorder()
 		router.ServeHTTP(recorder, req)
 		if recorder.Code != http.StatusCreated {
-			t.Fatalf("status code = %d, want %d", recorder.Code, http.StatusCreated)
+			t.Fatalf("status  = %d, want %d", recorder.Code, http.StatusCreated)
 		}
 		if recorder.Header().Get("Content-Type") != "application/json" {
 			t.Fatalf("Content-Type = %v,want application/json ", recorder.Header().Get("Content-Type"))
@@ -153,7 +153,7 @@ func TestRouter_Routes(t *testing.T) {
 		recorder1 := httptest.NewRecorder()
 		router.ServeHTTP(recorder1, req1)
 		if recorder1.Code != http.StatusNoContent {
-			t.Fatalf("status code = %d, want %d", recorder1.Code, http.StatusNoContent)
+			t.Fatalf("status  = %d, want %d", recorder1.Code, http.StatusNoContent)
 		}
 		if recorder1.Body.Len() != 0 {
 			t.Errorf("response body = %q, want empty body", recorder1.Body.String())
@@ -162,7 +162,33 @@ func TestRouter_Routes(t *testing.T) {
 		recorder2 := httptest.NewRecorder()
 		router.ServeHTTP(recorder2, req2)
 		if recorder2.Code != http.StatusNotFound {
-			t.Fatalf("status code = %d, want %d", recorder2.Code, http.StatusNotFound)
+			t.Fatalf("status  = %d, want %d", recorder2.Code, http.StatusNotFound)
 		}
 	})
+}
+
+func TestRouter_MethodNotAllowed(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := handler.NewHandler(app)
+	router := NewRouter(h)
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPut, "/notes", nil)
+	router.ServeHTTP(recorder, req)
+	if recorder.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("status  = %d, want %d", recorder.Code, http.StatusMethodNotAllowed)
+	}
+}
+
+func TestRouter_NotFound(t *testing.T) {
+	s := storage.NewInMemoryStorage()
+	app := application.NewApplication(s)
+	h := handler.NewHandler(app)
+	router := NewRouter(h)
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/unknown", nil)
+	router.ServeHTTP(recorder, req)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status  = %d, want %d", recorder.Code, http.StatusNotFound)
+	}
 }

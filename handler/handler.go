@@ -52,7 +52,8 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, errorResponse, 400)
 		return
 	}
-	createNote, err := h.application.CreateNote(request.Title, request.Content)
+	ctx := r.Context()
+	createNote, err := h.application.CreateNote(ctx, request.Title, request.Content)
 	if err != nil {
 		if errors.Is(err, application.ErrInvalidInput) {
 			createNoteErr := ErrorResponse{Error: err.Error()}
@@ -78,7 +79,8 @@ func WriteJSONResponse(w http.ResponseWriter, code int, data any) {
 }
 
 func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
-	list, err := h.application.ListNotes()
+	ctx := r.Context()
+	list, err := h.application.ListNotes(ctx)
 	if err != nil {
 		errorResponse := ErrorResponse{Error: "internal server error"}
 		WriteErrorResponse(w, errorResponse, http.StatusInternalServerError)
@@ -95,7 +97,8 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
-	note, err := h.application.GetNote(num)
+	ctx := r.Context()
+	note, err := h.application.GetNote(ctx, num)
 	if err != nil {
 		if errors.Is(err, application.ErrNoteNotFound) {
 			errorResponse := ErrorResponse{Error: err.Error()}
@@ -125,7 +128,8 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
-	updatedNote, err := h.application.UpdateNote(num, request.Title, request.Content)
+	ctx := r.Context()
+	updatedNote, err := h.application.UpdateNote(ctx, num, request.Title, request.Content)
 	if err != nil {
 		if errors.Is(err, application.ErrNoteNotFound) {
 			errorResponse := ErrorResponse{Error: err.Error()}
@@ -151,7 +155,8 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
-	err = h.application.DeleteNote(num)
+	ctx := r.Context()
+	err = h.application.DeleteNote(ctx, num)
 	if err != nil {
 		if errors.Is(err, application.ErrNoteNotFound) {
 			errorResponse := ErrorResponse{Error: err.Error()}

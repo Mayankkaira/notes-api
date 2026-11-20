@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -21,11 +22,11 @@ type UpdateNoteInput struct {
 }
 
 type Storage interface {
-	Create(input CreateNoteInput) (note.Note, error)
-	Get(ID int) (note.Note, error)
-	List() ([]note.Note, error)
-	Update(ID int, updateInput UpdateNoteInput) (note.Note, error)
-	Delete(ID int) error
+	Create(ctx context.Context, input CreateNoteInput) (note.Note, error)
+	Get(ctx context.Context, ID int) (note.Note, error)
+	List(ctx context.Context) ([]note.Note, error)
+	Update(ctx context.Context, ID int, updateInput UpdateNoteInput) (note.Note, error)
+	Delete(ctx context.Context, ID int) error
 }
 
 type Application struct {
@@ -37,7 +38,7 @@ func NewApplication(storage Storage) *Application {
 	return app
 }
 
-func (a *Application) CreateNote(title, content string) (note.Note, error) {
+func (a *Application) CreateNote(ctx context.Context, title, content string) (note.Note, error) {
 	var createdNote note.Note
 	if len(title) == 0 || len(content) == 0 {
 		return createdNote, ErrInvalidInput
@@ -49,24 +50,24 @@ func (a *Application) CreateNote(title, content string) (note.Note, error) {
 		CreatedAt: currentTime,
 		UpdatedAt: currentTime,
 	}
-	createdNote, err := a.storage.Create(noteInput)
+	createdNote, err := a.storage.Create(ctx, noteInput)
 	return createdNote, err
 }
 
-func (a *Application) GetNote(id int) (note.Note, error) {
-	storedNote, err := a.storage.Get(id)
+func (a *Application) GetNote(ctx context.Context, id int) (note.Note, error) {
+	storedNote, err := a.storage.Get(ctx, id)
 	if errors.Is(err, ErrStorageNotFound) {
 		return storedNote, ErrNoteNotFound
 	}
 	return storedNote, err
 }
 
-func (a *Application) ListNotes() ([]note.Note, error) {
-	cNotes, err := a.storage.List()
+func (a *Application) ListNotes(ctx context.Context) ([]note.Note, error) {
+	cNotes, err := a.storage.List(ctx)
 	return cNotes, err
 }
 
-func (a *Application) UpdateNote(id int, title, content *string) (note.Note, error) {
+func (a *Application) UpdateNote(ctx context.Context, id int, title, content *string) (note.Note, error) {
 	var updatedNote note.Note
 	if title == nil && content == nil {
 		return updatedNote, ErrInvalidInput
@@ -86,7 +87,7 @@ func (a *Application) UpdateNote(id int, title, content *string) (note.Note, err
 		Content:   content,
 		UpdatedAt: time.Now(),
 	}
-	updatedNote, err := a.storage.Update(id, updateNote)
+	updatedNote, err := a.storage.Update(ctx, id, updateNote)
 	if errors.Is(err, ErrStorageNotFound) {
 		return updatedNote, ErrNoteNotFound
 	}
@@ -94,8 +95,8 @@ func (a *Application) UpdateNote(id int, title, content *string) (note.Note, err
 
 }
 
-func (a *Application) DeleteNote(id int) error {
-	err := a.storage.Delete(id)
+func (a *Application) DeleteNote(ctx context.Context, id int) error {
+	err := a.storage.Delete(ctx, id)
 	if errors.Is(err, ErrStorageNotFound) {
 		return ErrNoteNotFound
 	}

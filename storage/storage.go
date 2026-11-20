@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"context"
+
 	"github.com/Mayankkaira/notes-api/application"
 	"github.com/Mayankkaira/notes-api/note"
 )
@@ -15,7 +17,7 @@ func NewInMemoryStorage() *InMemoryStorage {
 	return &InMemoryStorage{notes: notes, nextID: 1}
 }
 
-func (s *InMemoryStorage) Create(input application.CreateNoteInput) (note.Note, error) {
+func (s *InMemoryStorage) Create(ctx context.Context, input application.CreateNoteInput) (note.Note, error) {
 	unote := note.Note{
 		Title:     input.Title,
 		Content:   input.Content,
@@ -28,7 +30,7 @@ func (s *InMemoryStorage) Create(input application.CreateNoteInput) (note.Note, 
 	return unote, nil
 }
 
-func (s *InMemoryStorage) Get(id int) (note.Note, error) {
+func (s *InMemoryStorage) Get(ctx context.Context, id int) (note.Note, error) {
 	val, ok := s.notes[id]
 	if !ok {
 		return val, application.ErrStorageNotFound
@@ -36,7 +38,7 @@ func (s *InMemoryStorage) Get(id int) (note.Note, error) {
 	return val, nil
 }
 
-func (s *InMemoryStorage) List() ([]note.Note, error) {
+func (s *InMemoryStorage) List(ctx context.Context) ([]note.Note, error) {
 	noteSlice := make([]note.Note, 0)
 	for _, value := range s.notes {
 		noteSlice = append(noteSlice, value)
@@ -44,7 +46,7 @@ func (s *InMemoryStorage) List() ([]note.Note, error) {
 	return noteSlice, nil
 }
 
-func (s *InMemoryStorage) Update(id int, update application.UpdateNoteInput) (note.Note, error) {
+func (s *InMemoryStorage) Update(ctx context.Context, id int, update application.UpdateNoteInput) (note.Note, error) {
 	val, ok := s.notes[id]
 	if !ok {
 		return val, application.ErrStorageNotFound
@@ -60,7 +62,7 @@ func (s *InMemoryStorage) Update(id int, update application.UpdateNoteInput) (no
 	return val, nil
 }
 
-func (s *InMemoryStorage) Delete(id int) error {
+func (s *InMemoryStorage) Delete(ctx context.Context, id int) error {
 	_, ok := s.notes[id]
 	if !ok {
 		return application.ErrStorageNotFound

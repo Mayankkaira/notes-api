@@ -1,0 +1,22 @@
+# Environment & secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Go compiled binaries & test artifacts
+notes-api
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.out
+
+# Editor & OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store

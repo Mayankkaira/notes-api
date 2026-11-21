@@ -17,14 +17,14 @@ func TestInMemoryStorage_Create(t *testing.T) {
 		CreatedAt: currentTime,
 		UpdatedAt: currentTime,
 	}
-	note, err := s.Create(input)
+	note, err := s.Create(t.Context(), input)
 	if err != nil {
 		t.Fatalf("create note %v", err)
 	}
 	if note.ID != 1 {
 		t.Error("first id should be 1")
 	}
-	rNote, err := s.Get(note.ID)
+	rNote, err := s.Get(t.Context(), note.ID)
 	if err != nil {
 		t.Fatalf("get note:%v", err)
 	}
@@ -55,8 +55,8 @@ func TestInMemoryStorage_Create_IncrementID(t *testing.T) {
 		CreatedAt: currentTime,
 		UpdatedAt: currentTime,
 	}
-	note1, err1 := s.Create(input1)
-	note2, err2 := s.Create(input2)
+	note1, err1 := s.Create(t.Context(), input1)
+	note2, err2 := s.Create(t.Context(), input2)
 	if err1 != nil {
 		t.Fatalf("create note %v", err1)
 	}
@@ -66,7 +66,7 @@ func TestInMemoryStorage_Create_IncrementID(t *testing.T) {
 	if note1.ID != 1 || note2.ID != 2 {
 		t.Errorf("ID assignment incorrect: first ID = %d (want 1), second ID = %d (want 2)", note1.ID, note2.ID)
 	}
-	rNote, err := s.Get(note2.ID)
+	rNote, err := s.Get(t.Context(), note2.ID)
 	if err != nil {
 		t.Fatalf("get note:%v", err)
 	}
@@ -87,7 +87,7 @@ func TestInMemory_Update_TitleOnly(t *testing.T) {
 		CreatedAt: currentTime,
 		UpdatedAt: currentTime,
 	}
-	rNote, err := s.Create(input)
+	rNote, err := s.Create(t.Context(), input)
 	if err != nil {
 		t.Fatalf("Create note %v", err)
 	}
@@ -96,7 +96,7 @@ func TestInMemory_Update_TitleOnly(t *testing.T) {
 		Title:     &newTitle,
 		UpdatedAt: time.Now(),
 	}
-	uNote, err := s.Update(rNote.ID, updatedInput)
+	uNote, err := s.Update(t.Context(), rNote.ID, updatedInput)
 	if err != nil {
 		t.Fatalf("update note %v", err)
 	}
@@ -120,7 +120,7 @@ func TestInMemory_Update_ContentOnly(t *testing.T) {
 		CreatedAt: currentTime,
 		UpdatedAt: currentTime,
 	}
-	rNote, err := s.Create(input)
+	rNote, err := s.Create(t.Context(), input)
 	if err != nil {
 		t.Fatalf("Create note %v", err)
 	}
@@ -129,7 +129,7 @@ func TestInMemory_Update_ContentOnly(t *testing.T) {
 		Content:   &newContent,
 		UpdatedAt: time.Now(),
 	}
-	uNote, err := s.Update(rNote.ID, updatedInput)
+	uNote, err := s.Update(t.Context(), rNote.ID, updatedInput)
 	if err != nil {
 		t.Fatalf("update note %v", err)
 	}
@@ -151,7 +151,7 @@ func TestInMemoryStorage_Update_Notfound(t *testing.T) {
 		Title:     &newTitle,
 		UpdatedAt: time.Now(),
 	}
-	_, err := s.Update(2, updatedInput)
+	_, err := s.Update(t.Context(), 2, updatedInput)
 	if !errors.Is(err, application.ErrStorageNotFound) {
 		t.Fatalf("Update() error = %v, want %v", err, application.ErrStorageNotFound)
 	}
@@ -166,15 +166,15 @@ func TestInMemoryStorage_Delete(t *testing.T) {
 		CreatedAt: currentTime,
 		UpdatedAt: currentTime,
 	}
-	rNote, err := s.Create(input)
+	rNote, err := s.Create(t.Context(), input)
 	if err != nil {
 		t.Fatalf("create note:%v", err)
 	}
-	err = s.Delete(rNote.ID)
+	err = s.Delete(t.Context(), rNote.ID)
 	if err != nil {
 		t.Fatalf("Delete() error: %v", err)
 	}
-	_, err = s.Get(rNote.ID)
+	_, err = s.Get(t.Context(), rNote.ID)
 	if !errors.Is(err, application.ErrStorageNotFound) {
 		t.Errorf("error= %v, want %v", err, application.ErrStorageNotFound)
 	}
@@ -182,7 +182,7 @@ func TestInMemoryStorage_Delete(t *testing.T) {
 
 func TestInMemoryStorage_Delete_NotFound(t *testing.T) {
 	s := NewInMemoryStorage()
-	err := s.Delete(2)
+	err := s.Delete(t.Context(), 2)
 	if !errors.Is(err, application.ErrStorageNotFound) {
 		t.Fatalf("delete() %v, want %v", err, application.ErrStorageNotFound)
 	}
@@ -190,7 +190,7 @@ func TestInMemoryStorage_Delete_NotFound(t *testing.T) {
 
 func TestInMemory_Get_NotFound(t *testing.T) {
 	s := NewInMemoryStorage()
-	_, err := s.Get(2)
+	_, err := s.Get(t.Context(), 2)
 	if !errors.Is(err, application.ErrStorageNotFound) {
 		t.Fatalf("Get() %v, want %v", err, application.ErrStorageNotFound)
 	}
@@ -198,7 +198,7 @@ func TestInMemory_Get_NotFound(t *testing.T) {
 
 func TestInMemory_List_Empty(t *testing.T) {
 	s := NewInMemoryStorage()
-	rNote, err := s.List()
+	rNote, err := s.List(t.Context())
 	if err != nil {
 		t.Fatalf("list() %v", err)
 	}
@@ -225,15 +225,15 @@ func TestInMemory_List_Populated(t *testing.T) {
 		CreatedAt: currentTime,
 		UpdatedAt: currentTime,
 	}
-	rNote1, err1 := s.Create(input1)
-	rNote2, err2 := s.Create(input2)
+	rNote1, err1 := s.Create(t.Context(), input1)
+	rNote2, err2 := s.Create(t.Context(), input2)
 	if err1 != nil {
 		t.Fatalf("create() %v", err1)
 	}
 	if err2 != nil {
 		t.Fatalf("create() %v", err2)
 	}
-	lNote, err := s.List()
+	lNote, err := s.List(t.Context())
 	if err != nil {
 		t.Fatalf("List()%v", err)
 	}

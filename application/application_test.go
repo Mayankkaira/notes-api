@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -11,22 +12,22 @@ type FakeStorage struct {
 	createCalled bool
 }
 
-func (f *FakeStorage) Create(input CreateNoteInput) (note.Note, error) {
+func (f *FakeStorage) Create(ctx context.Context, input CreateNoteInput) (note.Note, error) {
 	f.createCalled = true
 	return note.Note{Title: input.Title, Content: input.Content, CreatedAt: input.CreatedAt, UpdatedAt: input.UpdatedAt}, nil
 }
 
-func (f *FakeStorage) Delete(id int) error {
+func (f *FakeStorage) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
-func (f *FakeStorage) Get(id int) (note.Note, error) {
+func (f *FakeStorage) Get(ctx context.Context, id int) (note.Note, error) {
 	return note.Note{}, nil
 }
-func (f *FakeStorage) List() ([]note.Note, error) {
+func (f *FakeStorage) List(ctx context.Context) ([]note.Note, error) {
 	return []note.Note{}, nil
 }
-func (f *FakeStorage) Update(ID int, updateInput UpdateNoteInput) (note.Note, error) {
+func (f *FakeStorage) Update(ctx context.Context, ID int, updateInput UpdateNoteInput) (note.Note, error) {
 	return note.Note{}, nil
 }
 
@@ -35,7 +36,7 @@ func TestCreateNote_EmptyTitle(t *testing.T) {
 	app := NewApplication(fake)
 	title := ""
 	content := "something"
-	_, err := app.CreateNote(title, content)
+	_, err := app.CreateNote(t.Context(), title, content)
 	if !errors.Is(err, ErrInvalidInput) {
 		t.Errorf("%v is not %v", err, ErrInvalidInput)
 	}
@@ -49,7 +50,7 @@ func TestCreateNote_EmptyContent(t *testing.T) {
 	app := NewApplication(fake)
 	title := "Learn Go"
 	content := ""
-	_, err := app.CreateNote(title, content)
+	_, err := app.CreateNote(t.Context(), title, content)
 	if !errors.Is(err, ErrInvalidInput) {
 		t.Errorf("%v is not %v", err, ErrInvalidInput)
 	}
@@ -63,7 +64,7 @@ func TestCreateNote_Success(t *testing.T) {
 	app := NewApplication(fake)
 	title := "Learn Go"
 	content := "Practice Testing"
-	note, err := app.CreateNote(title, content)
+	note, err := app.CreateNote(t.Context(), title, content)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
